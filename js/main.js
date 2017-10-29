@@ -4,7 +4,8 @@ function preload() {
   game.load.image('space', 'assets/space.png');
   game.load.image('sprite', 'assets/sprite1.png');
   game.load.image('bullet', 'assets/bullet.png');
-  game.load.image('enemy', 'assets/enemy1.png')
+  game.load.image('enemy1', 'assets/enemy1.png')
+  game.load.image('enemy2', 'assets/enemy2.png')
   game.load.spritesheet('explosion', 'assets/explode-sheet.png', 50, 50);
 };
 
@@ -12,7 +13,10 @@ var bullet;
 var bullets;
 var bulletTime = 0;
 var ship;
-var enemies;
+
+var enemiesOne;
+var enemiesTwo;
+
 var explosion;
 var explosions;
 
@@ -36,6 +40,7 @@ function create() {
   //start physics engine
   game.physics.startSystem(Phaser.Physics.ARCADE);
   background = game.add.tileSprite(0, 0, 800, 800, 'space');
+
   //create bullet group
   bullets = game.add.group();
   bullets.enableBody = true;
@@ -45,6 +50,7 @@ function create() {
   bullets.setAll('anchor.y', 1);
   bullets.setAll('outOfBoundsKill', true);
   bullets.setAll('checkWorldBounds', true);
+
   //create power-up group
 
   //add ship sprite
@@ -55,19 +61,32 @@ function create() {
   ship.body.maxVelocity.setTo(maxVelocity, maxVelocity);
   ship.body.drag.setTo(drag, drag)
   ship.body.collideWorldBounds = true;
-  //add enemy
-  enemies =  game.add.group();
-  enemies.enableBody = true;
-  enemies.physicsBodyType = Phaser.Physics.ARCADE;
-  enemies.createMultiple(5, 'enemy');
-  enemies.setAll('anchor.x', 0.5);
-  enemies.setAll('anchor.y', 0.5);
-  enemies.setAll('scale.x', 1.75);
-  enemies.setAll('scale.y', 1.75);
-  enemies.setAll('outOfBoundsKill', true);
-  enemies.setAll('checkWorldBounds', true);
-  //enemies.setAll('angle', 180);
-  launchEnemy();
+
+  //add enemy group
+  enemiesOne =  game.add.group();
+  enemiesOne.enableBody = true;
+  enemiesOne.physicsBodyType = Phaser.Physics.ARCADE;
+  enemiesOne.createMultiple(5, 'enemy1');
+  enemiesOne.setAll('anchor.x', 0.5);
+  enemiesOne.setAll('anchor.y', 0.5);
+  enemiesOne.setAll('scale.x', 1.75);
+  enemiesOne.setAll('scale.y', 1.75);
+  enemiesOne.setAll('outOfBoundsKill', true);
+  enemiesOne.setAll('checkWorldBounds', true);
+  launchEnemyOne();
+  //add second enemy group
+  enemiesTwo =  game.add.group();
+  enemiesTwo.enableBody = true;
+  enemiesTwo.physicsBodyType = Phaser.Physics.ARCADE;
+  enemiesTwo.createMultiple(5, 'enemy2');
+  enemiesTwo.setAll('anchor.x', 0.5);
+  enemiesTwo.setAll('anchor.y', 0.5);
+  enemiesTwo.setAll('scale.x', 1.75);
+  enemiesTwo.setAll('scale.y', 1.75);
+  enemiesTwo.setAll('outOfBoundsKill', true);
+  enemiesTwo.setAll('checkWorldBounds', true);
+  launchEnemyTwo();
+  
   //explosion pool
   explosions = game.add.group();
   explosions.enableBody = true;
@@ -80,6 +99,7 @@ function create() {
   explosions.forEach(function(explosion) {
     explosion.animations.add('explosion');
   });
+
   //input assignment
   cursors = game.input.keyboard.createCursorKeys();
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -110,8 +130,11 @@ function update() {
     fireBullet();
   }
   //check for collisions
-  game.physics.arcade.overlap(ship, enemies, shipCollision, null, this);
-  game.physics.arcade.overlap(enemies, bullets, destroyEnemy, null, this);
+  game.physics.arcade.overlap(ship, enemiesOne, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesOne, bullets, destroyEnemyOne, null, this);
+
+  game.physics.arcade.overlap(ship, enemiesTwo, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesTwo, bullets, destroyEnemyTwo, null, this);
 };
 function render() {
   // for (var i = 0; i < enemies.length; i++) {
@@ -140,16 +163,28 @@ function fireBullet() {
 ////create random number function for testing
 
 //launch enemy function
-function launchEnemy() {
-  var enemy = enemies.getFirstExists(false);
+function launchEnemyOne() {
+  let enemy = enemiesOne.getFirstExists(false);
   if (enemy) {
     enemy.reset(game.rnd.integerInRange(0, game.width), -20);
     enemy.body.velocity.x = game.rnd.integerInRange(-300, 300);
     enemy.body.velocity.y = 300;
     enemy.body.drag.x = 100;
   }
-  game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemy);
+  game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemyOne);
 };
+//launch second enemy
+function launchEnemyTwo() {
+  let enemy = enemiesTwo.getFirstExists(false);
+  if (enemy) {
+    enemy.reset(game.rnd.integerInRange(0, game.width), -20);
+    enemy.body.velocity.x = game.rnd.integerInRange(-300, 300);
+    enemy.body.velocity.y = 300;
+    enemy.body.drag.x = 100;
+  }
+  game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemyTwo);
+};
+
 // function launchPowerup() {
 //
 // }
@@ -173,7 +208,7 @@ function shipCollision(ship, enemy) {
   }
 };
 //destroy enemy number one function
-function destroyEnemy(enemy, bullet) {
+function destroyEnemyOne(enemy, bullet) {
   var explosion = explosions.getFirstExists(false);
   explosion.reset(enemy.body.x + enemy.body.halfWidth, enemy.y + enemy.body.halfHeight);
   explosion.body.velocity.y = enemy.body.velocity.y;
@@ -183,5 +218,17 @@ function destroyEnemy(enemy, bullet) {
   bullet.kill();
   //update score
   score += 100;
+  scoreText.text = 'Score: ' + score;
+};
+function destroyEnemyTwo(enemy, bullet) {
+  var explosion = explosions.getFirstExists(false);
+  explosion.reset(enemy.body.x + enemy.body.halfWidth, enemy.y + enemy.body.halfHeight);
+  explosion.body.velocity.y = enemy.body.velocity.y;
+  explosion.alpha = 0.7;
+  explosion.play('explosion', 30, false, true);
+  enemy.kill();
+  bullet.kill();
+  //update score
+  score += 300;
   scoreText.text = 'Score: ' + score;
 };

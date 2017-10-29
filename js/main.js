@@ -16,6 +16,11 @@ var enemies;
 var explosion;
 var explosions;
 
+var score = 0;
+var scoreText;
+var health = 100;
+var healthText;
+
 var cursors;
 var fireButton;
 
@@ -45,6 +50,7 @@ function create() {
   //add ship sprite
   ship = game.add.sprite(400, 700, 'sprite');
   ship.anchor.setTo(0.5, 0.5);
+  ship.scale.setTo(0.75, 0.75)
   game.physics.enable(ship, Phaser.Physics.ARCADE);
   ship.body.maxVelocity.setTo(maxVelocity, maxVelocity);
   ship.body.drag.setTo(drag, drag)
@@ -56,8 +62,8 @@ function create() {
   enemies.createMultiple(5, 'enemy');
   enemies.setAll('anchor.x', 0.5);
   enemies.setAll('anchor.y', 0.5);
-  enemies.setAll('scale.x', 0.5);
-  enemies.setAll('scale.y', 0.5);
+  enemies.setAll('scale.x', 1.75);
+  enemies.setAll('scale.y', 1.75);
   enemies.setAll('outOfBoundsKill', true);
   enemies.setAll('checkWorldBounds', true);
   //enemies.setAll('angle', 180);
@@ -69,12 +75,17 @@ function create() {
   explosions.createMultiple(30, 'explosion');
   explosions.setAll('anchor.x', 0.5);
   explosions.setAll('anchor.y', 0.5);
+  explosions.setAll('scale.x', 0.5);
+  explosions.setAll('scale.y', 0.5);
   explosions.forEach(function(explosion) {
     explosion.animations.add('explosion');
   });
   //input assignment
   cursors = game.input.keyboard.createCursorKeys();
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  //HUD
+  scoreText = game.add.text(16, 64, 'Score: 0', { fontSize: '32px', fill: '#ffffff'});
+  healthText = game.add.text(16, 16, 'Health: 100', {fontSize: '32px', fill: '#ffffff'});
 };
 function update() {
   //create scrolling backdrop
@@ -122,7 +133,7 @@ function fireBullet() {
     if (bullet) {
       bullet.reset(ship.x, ship.y);
       bullet.body.velocity.y = -600;
-      bulletTime = game.time.now + 50;
+      bulletTime = game.time.now + 100;
     }
   }
 };
@@ -150,7 +161,18 @@ function shipCollision(ship, enemy) {
   explosion.alpha = 0.7;
   explosion.play('explosion', 30, false, true);
   enemy.kill();
+  //update health
+  health -= 20;
+  healthText.text = 'Health: ' + health;
+  if (health === 0) {
+    explosion.body.velocity.y = ship.body.velocity.y;
+    explosion.alpha = 0.7;
+    explosion.play('explosion', 30, false, true);
+    ship.kill();
+    game.add.text(300, 400, 'GAME OVER', {fontSize: '132px', fill: '#ffffff'});
+  }
 };
+//destroy enemy number one function
 function destroyEnemy(enemy, bullet) {
   var explosion = explosions.getFirstExists(false);
   explosion.reset(enemy.body.x + enemy.body.halfWidth, enemy.y + enemy.body.halfHeight);
@@ -158,4 +180,8 @@ function destroyEnemy(enemy, bullet) {
   explosion.alpha = 0.7;
   explosion.play('explosion', 30, false, true);
   enemy.kill();
-}
+  bullet.kill();
+  //update score
+  score += 100;
+  scoreText.text = 'Score: ' + score;
+};

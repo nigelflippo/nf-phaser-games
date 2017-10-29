@@ -29,7 +29,7 @@ var cursors;
 var fireButton;
 
 var acceleration = 1000;
-var drag = 500;
+var drag = 400;
 var maxVelocity = 500;
 
 
@@ -86,12 +86,12 @@ function create() {
   enemiesTwo.setAll('outOfBoundsKill', true);
   enemiesTwo.setAll('checkWorldBounds', true);
   launchEnemyTwo();
-  
+
   //explosion pool
   explosions = game.add.group();
   explosions.enableBody = true;
   explosions.physicsBodyType = Phaser.Physics.ARCADE;
-  explosions.createMultiple(30, 'explosion');
+  explosions.createMultiple(5, 'explosion');
   explosions.setAll('anchor.x', 0.5);
   explosions.setAll('anchor.y', 0.5);
   explosions.setAll('scale.x', 0.5);
@@ -104,12 +104,12 @@ function create() {
   cursors = game.input.keyboard.createCursorKeys();
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
   //HUD
-  scoreText = game.add.text(16, 64, 'Score: 0', { fontSize: '32px', fill: '#ffffff'});
-  healthText = game.add.text(16, 16, 'Health: 100', {fontSize: '32px', fill: '#ffffff'});
+  scoreText = game.add.text(16, 16, 'Score: 0', { font: '48px VT323', fill: '#ffffff'});
+  healthText = game.add.text(game.width - 225, 16, 'Health: 100', {font: '48px VT323', fill: '#ffffff'});
 };
 function update() {
   //create scrolling backdrop
-  background.tilePosition.y += 3;
+  background.tilePosition.y += 2;
   //reset player
   ship.body.acceleration.x = 0;
   ship.body.acceleration.y = 0;
@@ -127,6 +127,9 @@ function update() {
   }
   //fire bullets
   if (fireButton.isDown) {
+    if (score > 3000) {
+      fireNewBullet();
+    }
     fireBullet();
   }
   //check for collisions
@@ -155,8 +158,18 @@ function fireBullet() {
     bullet = bullets.getFirstExists(false);
     if (bullet) {
       bullet.reset(ship.x, ship.y);
-      bullet.body.velocity.y = -600;
-      bulletTime = game.time.now + 100;
+      bullet.body.velocity.y = -400;
+      bulletTime = game.time.now + 200;
+    }
+  }
+};
+function fireNewBullet() {
+  if (game.time.now > bulletTime) {
+    bullet = bullets.getFirstExists(false);
+    if (bullet) {
+      bullet.reset(ship.x, ship.y);
+      bullet.body.velocity.y = -750;
+      bulletTime = game.time.now + 50;
     }
   }
 };
@@ -169,7 +182,6 @@ function launchEnemyOne() {
     enemy.reset(game.rnd.integerInRange(0, game.width), -20);
     enemy.body.velocity.x = game.rnd.integerInRange(-300, 300);
     enemy.body.velocity.y = 300;
-    enemy.body.drag.x = 100;
   }
   game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemyOne);
 };
@@ -178,11 +190,10 @@ function launchEnemyTwo() {
   let enemy = enemiesTwo.getFirstExists(false);
   if (enemy) {
     enemy.reset(game.rnd.integerInRange(0, game.width), -20);
-    enemy.body.velocity.x = game.rnd.integerInRange(-300, 300);
+    enemy.body.velocity.x = game.rnd.integerInRange(-200, 200);
     enemy.body.velocity.y = 300;
-    enemy.body.drag.x = 100;
   }
-  game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemyTwo);
+  game.time.events.add(game.rnd.integerInRange(300, 5000), launchEnemyTwo);
 };
 
 // function launchPowerup() {
@@ -204,7 +215,7 @@ function shipCollision(ship, enemy) {
     explosion.alpha = 0.7;
     explosion.play('explosion', 30, false, true);
     ship.kill();
-    game.add.text(300, 400, 'GAME OVER', {fontSize: '132px', fill: '#ffffff'});
+    game.add.text(160, 300, 'GAME OVER', {font: '132px VT323', fill: '#ffffff'});
   }
 };
 //destroy enemy number one function

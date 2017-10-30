@@ -1,11 +1,12 @@
-var game = new Phaser.Game(500, 600, Phaser.AUTO, 'Shmup The Ante', { preload: preload, create: create, update: update});
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'Shmup The Ante', { preload: preload, create: create, update: update});
 
 function preload() {
   game.load.image('space', 'assets/space.png');
   game.load.image('sprite', 'assets/sprite1.png');
   game.load.image('bullet', 'assets/bullet.png');
-  game.load.image('enemy1', 'assets/enemy1.png')
-  game.load.image('enemy2', 'assets/enemy2.png')
+  game.load.image('bullet2', 'assets/bullet2.png');
+  game.load.image('enemy1', 'assets/enemy1.png');
+  game.load.image('enemy2', 'assets/enemy2.png');
   game.load.spritesheet('explosion', 'assets/explode-sheet.png', 50, 50);
 };
 
@@ -13,6 +14,7 @@ var bullet;
 var bullets;
 var bulletTime = 0;
 var ship;
+
 
 var enemiesOne;
 var enemiesTwo;
@@ -24,6 +26,8 @@ var score = 0;
 var scoreText;
 var health = 100;
 var healthText;
+
+var gameOver;
 
 var cursors;
 var fireButton;
@@ -50,17 +54,15 @@ function create() {
   bullets.setAll('anchor.y', 1);
   bullets.setAll('outOfBoundsKill', true);
   bullets.setAll('checkWorldBounds', true);
-
-  //create power-up group
-
   //add ship sprite
-  ship = game.add.sprite(400, 700, 'sprite');
+  ship = game.add.sprite(400, 600, 'sprite');
   ship.anchor.setTo(0.5, 0.5);
   ship.scale.setTo(0.75, 0.75)
   game.physics.enable(ship, Phaser.Physics.ARCADE);
   ship.body.maxVelocity.setTo(maxVelocity, maxVelocity);
   ship.body.drag.setTo(drag, drag)
   ship.body.collideWorldBounds = true;
+  ship.kill();
 
   //add enemy group
   enemiesOne =  game.add.group();
@@ -101,11 +103,23 @@ function create() {
   });
 
   //input assignment
-  cursors = game.input.keyboard.createCursorKeys();
+  upButton = game.input.keyboard.addKey(Phaser.Keyboard.W);
+  downButton = game.input.keyboard.addKey(Phaser.Keyboard.S);
+  leftButton = game.input.keyboard.addKey(Phaser.Keyboard.A);
+  rightButton = game.input.keyboard.addKey(Phaser.Keyboard.D);
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+  restartButton = game.input.keyboard.addKey(Phaser.Keyboard.R);
+  startButton = game.input.keyboard.addKey(Phaser.Keyboard.E);
   //HUD
-  scoreText = game.add.text(16, 16, 'Score: 0', { font: '32px VT323', fill: '#ffffff'});
-  healthText = game.add.text(game.width - 150, 16, 'Health: 100', {font: '32px VT323', fill: '#ffffff'});
+  scoreText = game.add.text(16, 16, 'Score: 0', {font: '32px VT323', fill: '#ffffff'});
+  scoreText.visible = false;
+  healthText = game.add.text(game.width - 160, 16, 'Shields: 100', {font: '32px VT323', fill: '#ffffff'});
+  healthText.visible = false;
+  topScoreText = game.add.text(16, 48, 'Top Score: ' + localStorage.getItem('top-score'), {font: '32px VT323', fill: '#ffffff'});
+  topScoreText.visible = false;
+  bannerText = game.add.text(190, 200, 'Sh\'mup The Ante', {font: '72px VT323', fill: '#fff'});
+  beginText = game.add.text(300, 270, 'Press E to begin', {font: '32px VT323', fill: '#fff'});
+  controlsText = game.add.text(265, 380, 'Movement: WASD | Shoot: SPACE', {font: '24px VT323', fill: '#fff'})
 };
 function update() {
   //create scrolling backdrop
@@ -114,23 +128,28 @@ function update() {
   ship.body.acceleration.x = 0;
   ship.body.acceleration.y = 0;
   //controls
-  if (cursors.left.isDown) {
+  if (leftButton.isDown) {
     ship.body.acceleration.x = -acceleration;
-  } else if (cursors.right.isDown) {
+  } else if (rightButton.isDown) {
     ship.body.acceleration.x = acceleration;
   }
-  if (cursors.up.isDown) {
+  if (upButton.isDown) {
     ship.body.acceleration.y = -acceleration;
   }
-  if (cursors.down.isDown) {
+  if (downButton.isDown) {
     ship.body.acceleration.y = acceleration;
   }
   //fire bullets
   if (fireButton.isDown) {
-    if (score > 3000) {
-      fireNewBullet();
-    }
     fireBullet();
+  };
+  //create restart
+  if (restartButton.isDown) {
+    restart();
+  };
+  //start
+  if (startButton.isDown) {
+    startGame();
   }
   //check for collisions
   game.physics.arcade.overlap(ship, enemiesOne, shipCollision, null, this);
@@ -140,9 +159,12 @@ function update() {
   game.physics.arcade.overlap(enemiesTwo, bullets, destroyEnemyTwo, null, this);
 };
 function render() {
-  // for (var i = 0; i < enemies.length; i++) {
-  //   game.debug.body(enemies.children[i]);
-  // }
+  for (var i = 0; i < enemiesOne.length; i++) {
+    game.debug.body(enemiesOne.children[i]);
+  }
+  for (var i = 0; i < enemiesTwo.length; i++) {
+    game.debug.body(enemiesTwo.children[i]);
+  }
 };
 //fullscreen
 function goFull() {
@@ -158,30 +180,18 @@ function fireBullet() {
     bullet = bullets.getFirstExists(false);
     if (bullet) {
       bullet.reset(ship.x, ship.y);
-      bullet.body.velocity.y = -400;
-      bulletTime = game.time.now + 200;
+      bullet.body.velocity.y = -500;
+      bulletTime = game.time.now + 125;
     }
   }
 };
-function fireNewBullet() {
-  if (game.time.now > bulletTime) {
-    bullet = bullets.getFirstExists(false);
-    if (bullet) {
-      bullet.reset(ship.x, ship.y);
-      bullet.body.velocity.y = -750;
-      bulletTime = game.time.now + 100;
-    }
-  }
-};
-////create random number function for testing
-
 //launch enemy function
 function launchEnemyOne() {
   let enemy = enemiesOne.getFirstExists(false);
   if (enemy) {
     enemy.reset(game.rnd.integerInRange(0, game.width), -20);
     enemy.body.velocity.x = game.rnd.integerInRange(-300, 300);
-    enemy.body.velocity.y = 300;
+    enemy.body.velocity.y = 500;
   }
   game.time.events.add(game.rnd.integerInRange(300, 3000), launchEnemyOne);
 };
@@ -195,10 +205,6 @@ function launchEnemyTwo() {
   }
   game.time.events.add(game.rnd.integerInRange(300, 5000), launchEnemyTwo);
 };
-
-// function launchPowerup() {
-//
-// }
 //ship collision function
 function shipCollision(ship, enemy) {
   var explosion = explosions.getFirstExists(false);
@@ -208,14 +214,15 @@ function shipCollision(ship, enemy) {
   explosion.play('explosion', 30, false, true);
   enemy.kill();
   //update health
-  health -= 100;
-  healthText.text = 'Health: ' + health;
-  if (health === 0) {
+  health -= 20;
+  healthText.text = 'Shields: ' + health;
+  if (health <= 0) {
     explosion.body.velocity.y = ship.body.velocity.y;
     explosion.alpha = 0.7;
     explosion.play('explosion', 30, false, true);
     ship.kill();
-    game.add.text(130, 225, 'GAME OVER', {font: '64px VT323', fill: '#ffffff'});
+    gameOver = game.add.text(275, 240, 'GAME OVER', {font: '64px VT323', fill: '#ffffff'});
+    restartText = game.add.text(280, 300, 'Press R to restart', {font: '32px VT323', fill: '#ffffff'});
   }
 };
 //destroy enemy number one function
@@ -242,4 +249,34 @@ function destroyEnemyTwo(enemy, bullet) {
   //update score
   score += 300;
   scoreText.text = 'Score: ' + score;
+};
+//start game with E
+function startGame() {
+  ship.reset(game.width / 2, 700)
+  ship.revive();
+  healthText.visible = true;
+  topScoreText.visible = true;
+  scoreText.visible = true;
+  beginText.visible = false;
+  bannerText.visible = false;
+  controlsText.visible = false;
+};
+//restart game with R after death
+function restart() {
+  if (health === 0) {
+    if (score > localStorage.getItem('top-score')) {
+      localStorage.setItem('top-score', score);
+    }
+    health = 100;
+    healthText.text = 'Shields: ' + health;
+    score = 0;
+    scoreText.text = 'Score: ' + score;
+    let topScore = localStorage.getItem('top-score');
+    topScoreText.text = 'Top Score: ' + topScore;
+
+    ship.reset(game.width / 2, 700)
+    ship.revive();
+    gameOver.visible = false;
+    restartText.visible = false;
+  }
 };

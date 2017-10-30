@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 800, Phaser.AUTO, '', { preload: preload, create: create, update: update});
+var game = new Phaser.Game(500, 600, Phaser.AUTO, 'Shmup The Ante', { preload: preload, create: create, update: update});
 
 function preload() {
   game.load.image('space', 'assets/space.png');
@@ -69,8 +69,8 @@ function create() {
   enemiesOne.createMultiple(5, 'enemy1');
   enemiesOne.setAll('anchor.x', 0.5);
   enemiesOne.setAll('anchor.y', 0.5);
-  enemiesOne.setAll('scale.x', 1.75);
-  enemiesOne.setAll('scale.y', 1.75);
+  enemiesOne.setAll('scale.x', 1.25);
+  enemiesOne.setAll('scale.y', 1.25);
   enemiesOne.setAll('outOfBoundsKill', true);
   enemiesOne.setAll('checkWorldBounds', true);
   launchEnemyOne();
@@ -94,8 +94,8 @@ function create() {
   explosions.createMultiple(5, 'explosion');
   explosions.setAll('anchor.x', 0.5);
   explosions.setAll('anchor.y', 0.5);
-  explosions.setAll('scale.x', 0.5);
-  explosions.setAll('scale.y', 0.5);
+  explosions.setAll('scale.x', 1.5);
+  explosions.setAll('scale.y', 1.5);
   explosions.forEach(function(explosion) {
     explosion.animations.add('explosion');
   });
@@ -104,8 +104,8 @@ function create() {
   cursors = game.input.keyboard.createCursorKeys();
   fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
   //HUD
-  scoreText = game.add.text(16, 16, 'Score: 0', { font: '48px VT323', fill: '#ffffff'});
-  healthText = game.add.text(game.width - 225, 16, 'Health: 100', {font: '48px VT323', fill: '#ffffff'});
+  scoreText = game.add.text(16, 16, 'Score: 0', { font: '32px VT323', fill: '#ffffff'});
+  healthText = game.add.text(game.width - 150, 16, 'Health: 100', {font: '32px VT323', fill: '#ffffff'});
 };
 function update() {
   //create scrolling backdrop
@@ -169,7 +169,7 @@ function fireNewBullet() {
     if (bullet) {
       bullet.reset(ship.x, ship.y);
       bullet.body.velocity.y = -750;
-      bulletTime = game.time.now + 50;
+      bulletTime = game.time.now + 100;
     }
   }
 };
@@ -208,14 +208,14 @@ function shipCollision(ship, enemy) {
   explosion.play('explosion', 30, false, true);
   enemy.kill();
   //update health
-  health -= 20;
+  health -= 100;
   healthText.text = 'Health: ' + health;
   if (health === 0) {
     explosion.body.velocity.y = ship.body.velocity.y;
     explosion.alpha = 0.7;
     explosion.play('explosion', 30, false, true);
     ship.kill();
-    game.add.text(160, 300, 'GAME OVER', {font: '132px VT323', fill: '#ffffff'});
+    game.add.text(130, 225, 'GAME OVER', {font: '64px VT323', fill: '#ffffff'});
   }
 };
 //destroy enemy number one function

@@ -2,7 +2,7 @@
   font-family: 'VT323';
 }
 body, html {
-  background-color: #1b2632;
+  background-color: #e0e0e0;
 }
 canvas {
   display: block;
@@ -11,7 +11,18 @@ canvas {
 @font-face {
   font-family: 'VT323';
 }
-
 .font-load {
   visibility: hidden;
+}
+.tech-pic {
+  height: 100px;
+  width: auto;
+}
+.technologies {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  font-size: 32px;
 }

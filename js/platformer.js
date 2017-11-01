@@ -26,13 +26,18 @@ var mainState = {
     this.wins = game.add.group();
     position = 32;
 
+    this.game.add.text(this.game.width - 70, 16, 'FINISH', {font: '20px VT323'});
+    this.game.add.text(this.game.width / 2 - 115, 16, 'CONTROLS: ARROWS | SPACE', {font: '20px VT323'});
+    this.game.add.text(20, 520, 'START', {font: '20px VT323'});
+
+
     var level = [
       'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
       'x                                                3',
       'x                                                3',
       'x                                                3',
       'x                                                3',
-      'x                        0 0                  xxx3',
+      'x                        0 0                  xxxx',
       'x                                      xxxxx     x',
       'x                                                x',
       'x             !   xxxxx       xxxxx              x',

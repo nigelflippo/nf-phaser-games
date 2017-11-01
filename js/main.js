@@ -269,6 +269,7 @@ function restart() {
     }
     health = 100;
     healthText.text = 'Shields: ' + health;
+
     score = 0;
     scoreText.text = 'Score: ' + score;
     let topScore = localStorage.getItem('top-score');

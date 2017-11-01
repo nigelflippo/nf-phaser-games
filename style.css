@@ -1,12 +1,27 @@
 * {
   font-family: 'VT323';
 }
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+}
 body, html {
   background-color: #e0e0e0;
 }
 canvas {
   display: block;
   margin: auto;
+}
+span {
+  font-size: 64px;
+  font-weight: bold;
+  background-color: #fff;
+  border: 3px solid black;
+  border-radius: 5px;
 }
 @font-face {
   font-family: 'VT323';
@@ -15,8 +30,9 @@ canvas {
   visibility: hidden;
 }
 .tech-pic {
-  height: 100px;
+  height: 200px;
   width: auto;
+  margin-bottom: 50px
 }
 .technologies {
   display: flex;

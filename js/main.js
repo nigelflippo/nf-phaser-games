@@ -4,7 +4,8 @@ function preload() {
   game.load.image('space', 'assets/space.png');
   game.load.image('sprite', 'assets/sprite1.png');
   game.load.image('bullet', 'assets/bullet.png');
-  game.load.image('bullet2', 'assets/bullet2.png');
+  game.load.image('bullet2', 'assets/bullet2.png')
+  game.load.image('bullet3', 'assets/bullet3.png');
   game.load.image('enemy1', 'assets/enemy1.png');
   game.load.image('enemy2', 'assets/enemy2.png');
   game.load.spritesheet('explosion', 'assets/explode-sheet.png', 50, 50);
@@ -54,6 +55,24 @@ function create() {
   bullets.setAll('anchor.y', 1);
   bullets.setAll('outOfBoundsKill', true);
   bullets.setAll('checkWorldBounds', true);
+
+  bulletsTwo = game.add.group();
+  bulletsTwo.enableBody = true;
+  bulletsTwo.physicsBodyType = Phaser.Physics.ARCADE;
+  bulletsTwo.createMultiple(30, 'bullet2');
+  bulletsTwo.setAll('anchor.x', 0.46);
+  bulletsTwo.setAll('anchor.y', 1.5);
+  bulletsTwo.setAll('outOfBoundsKill', true);
+  bulletsTwo.setAll('checkWorldBounds', true);
+
+  bulletsThree = game.add.group();
+  bulletsThree.enableBody = true;
+  bulletsThree.physicsBodyType = Phaser.Physics.ARCADE;
+  bulletsThree.createMultiple(30, 'bullet3');
+  bulletsThree.setAll('anchor.x', 0.46);
+  bulletsThree.setAll('anchor.y', 2);
+  bulletsThree.setAll('outOfBoundsKill', true);
+  bulletsThree.setAll('checkWorldBounds', true);
   //add ship sprite
   ship = game.add.sprite(400, 600, 'sprite');
   ship.anchor.setTo(0.5, 0.5);
@@ -146,7 +165,13 @@ function update() {
   }
   //fire bullets
   if (fireButton.isDown) {
+    if (score >= 5000 && score <= 8000) {
+      fireBulletTwo();
+    } else if (score > 8000) {
+      fireBulletThree();
+    } else {
     fireBullet();
+    }
   };
   //create restart
   if (restartButton.isDown) {
@@ -162,6 +187,18 @@ function update() {
 
   game.physics.arcade.overlap(ship, enemiesTwo, shipCollision, null, this);
   game.physics.arcade.overlap(enemiesTwo, bullets, destroyEnemyTwo, null, this);
+
+  game.physics.arcade.overlap(ship, enemiesOne, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesOne, bulletsTwo, destroyEnemyOne, null, this);
+
+  game.physics.arcade.overlap(ship, enemiesTwo, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesTwo, bulletsTwo, destroyEnemyTwo, null, this);
+
+  game.physics.arcade.overlap(ship, enemiesOne, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesOne, bulletsThree, destroyEnemyOne, null, this);
+
+  game.physics.arcade.overlap(ship, enemiesTwo, shipCollision, null, this);
+  game.physics.arcade.overlap(enemiesTwo, bulletsThree, destroyEnemyTwo, null, this);
 };
 function render() {
   for (var i = 0; i < enemiesOne.length; i++) {
@@ -185,8 +222,28 @@ function fireBullet() {
     bullet = bullets.getFirstExists(false);
     if (bullet) {
       bullet.reset(ship.x, ship.y);
-      bullet.body.velocity.y = -500;
-      bulletTime = game.time.now + 125;
+      bullet.body.velocity.y = -400;
+      bulletTime = game.time.now + 200;
+    }
+  }
+};
+function fireBulletTwo() {
+  if (game.time.now > bulletTime) {
+    bullet = bulletsTwo.getFirstExists(false);
+    if (bullet) {
+      bullet.reset(ship.x, ship.y);
+      bullet.body.velocity.y = -600;
+      bulletTime = game.time.now + 150;
+    }
+  }
+};
+function fireBulletThree() {
+  if (game.time.now > bulletTime) {
+    bullet = bulletsThree.getFirstExists(false);
+    if (bullet) {
+      bullet.reset(ship.x, ship.y);
+      bullet.body.velocity.y = -800;
+      bulletTime = game.time.now + 600;
     }
   }
 };

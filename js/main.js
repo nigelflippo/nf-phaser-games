@@ -115,7 +115,12 @@ function create() {
   scoreText.visible = false;
   healthText = game.add.text(game.width - 160, 16, 'Shields: 100', {font: '32px VT323', fill: '#ffffff'});
   healthText.visible = false;
-  topScoreText = game.add.text(16, 48, 'Top Score: ' + localStorage.getItem('top-score'), {font: '32px VT323', fill: '#ffffff'});
+  if (localStorage.getItem('top-score')) {
+    topScoreText = game.add.text(16, 48, 'Top Score: ' + localStorage.getItem('top-score'), {font: '32px VT323', fill: '#ffffff'});
+  } else {
+    topScoreText = game.add.text(16, 48, 'Top Score: 0', {font: '32px VT323', fill: '#ffffff'});
+
+  }
   topScoreText.visible = false;
   bannerText = game.add.text(190, 200, 'Sh\'mup The Ante', {font: '72px VT323', fill: '#fff'});
   beginText = game.add.text(300, 270, 'Press E to begin', {font: '32px VT323', fill: '#fff'});

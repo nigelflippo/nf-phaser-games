@@ -5,7 +5,6 @@ describe('game', function() {
     expect(game).to.be.an('object')
   })
 })
-
 describe('startGame', function() {
   it('should be a function', function() {
     expect(restart).to.be.a('function')
